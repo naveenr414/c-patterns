@@ -4,6 +4,7 @@ import random
 import turtle
 import copy
 import math
+import time
 
 b = turtle.Turtle()
 
@@ -23,19 +24,18 @@ def toLittle(b):
     return ret
 
 def drawPoints(p,minX,minY,maxX,maxY):
-    global b
+
+    averageX = (minX+maxX)/2
+    averageY = (minY+maxY)/2
     
     scale = 300
     k = copy.copy(p)
     k.append(p[0])
-    k = list(map(lambda x: ((x[0]-(minX+maxX)/2)/(maxX-minX)-1,(x[1]-(minY+maxY)/2)/(maxY-minY)-1),k))
-    
+    k = list(map(lambda x: ((x[0]-averageX)/(maxX-minX),(x[1]-averageY)/(maxY-minY)),k))
 
     b.penup()
-    b.setx(k[0][0]*scale)
-    b.sety(k[1][0]*scale)
+    b.setpos((k[0][0]*scale,k[0][1]*scale))
     b.pendown()
-
 
     currentAngle = 0
     for i in range(1,len(k)):
@@ -44,6 +44,9 @@ def drawPoints(p,minX,minY,maxX,maxY):
         currentAngle = angle
         dist = ((k[i][1]-k[i-1][1])**2 + (k[i][0]-k[i-1][0])**2)**.5 * scale
         b.forward(dist)
+
+    b.left(360-currentAngle)
+
 
 fileName = "data/maryland/county/Maryland_Physical_Boundaries__County_Boundaries_Generalized.shp"
 f = open(fileName,'rb')
@@ -125,26 +128,23 @@ while(True):
         if(x>topRight[0] and y>topRight[1]):
             topRight = (x,y)
 
+    num = 11
+
     if(recordNumber==24):
+        w = open("data.csv","w")
+        w.write("lat,lng,comment")
+        w.write("\n")
+        nums = points[num]
+        for i in nums:
+            w.write(str(i[::-1])[1:-1].replace(" ","")+",")
+            w.write("\n")
+        w.close()
+        
+
         minX = min(allPoints, key=lambda x: x[0])[0]
         minY = min(allPoints, key=lambda x: x[1])[1]
         maxX = max(allPoints, key=lambda x: x[0])[0]
         maxY = max(allPoints, key=lambda x: x[1])[1]
 
         
-        for i in range(recordNumber):
-            drawPoints(points[i],minX,minY,maxX,maxY)
         
-
-        
-        w = open("data.csv","w")
-        w.write("lat,lng,comment")
-        w.write("\n")
-        nums = points[0]
-        for i in nums:
-            w.write(str(i[::-1])[1:-1].replace(" ","")+",")
-            w.write("\n")
-        w.close()
-        
-        
-    
