@@ -20,6 +20,40 @@ class Point:
     def __str__(self):
         return "("+str(self.x)+ ", "+str(self.y)+")"
 
+class Line:
+    def __init__(self,p1,p2):
+        self.p1 = p1
+        self.p2 = p2
+
+    def intersect(self,l2):
+        x1,y1 = self.p1.x, self.p1.y
+        x2,y2 = self.p2.x, self.p2.y
+        x,y = l2.p1.x, l2.p1.y
+        xB,yB = l2.p2.x, l2.p2.y
+        
+        dx1 = x2-x1
+        dy1 = y2-y1
+
+        dx = xB-x
+        dy = yB-y
+
+        det = (-dx1 * dy + dy1 * dx)
+        if(abs(det)<.0001):
+            return False
+
+        DETinv = 1.0/det
+
+        r = DETinv * (-dy  * (x-x1) +  dx * (y-y1))
+
+        s = DETinv * (-dy1 * (x-x1) + dx1 * (y-y1))
+
+        if(0<r<1 and 0<s<1):
+            xi = (x1 + r*dx1 + x + s*dx)/2.0
+            yi = (y1 + r*dy1 + y + s*dy)/2.0
+            return Point(xi,yi,1)
+        else:
+            return False
+
 class Polygon:
     def __init__(self):
         self.points = []
@@ -90,7 +124,11 @@ class Polygon:
         area*=111.111**2 * math.cos(math.pi/180 * self.points[0].y)
 
         return area
-        
+
+    def getSubset(self,select):
+        bestPoints = sorted(self.points,key=lambda x: self.dists[self.points.index(x)])[-select:]
+        return sorted(bestPoints, key=lambda x: x.num)
+    
 class Shape:
     def __init__(self):
         self.polyList = []
