@@ -5,150 +5,93 @@ import turtle
 import copy
 import math
 import time
+from util import toLittle
+from geometry import *
 
-class Point:
-    def __init__(self,x,y,n):
-        self.coord = (x,y)
-        self.x = self.coord[0]
-        self.y = self.coord[1]
-        self.dist = 0
-        self.num = n
+class ShapeFile:
+    def __init__(self,fileName,maxNum = 1000000):
+        self.fileName = fileName
+        self.maxNum = maxNum
+        self.f = open(fileName,'rb')
+        self.shape = Shape()
+        self.readHeader()
+        self.readBody()
 
-    def rotate(self,angle):
-        rad = angle/180 * math.pi
-        self.x = self.x * math.cos(rad) - self.y * math.sin(rad)
-        self.y = self.x*math.sin(rad) + self.y*math.cos(rad)
-        self.coord = (x,y)
+    def readByte(self,num):
+        temp = ""
+        for i in range(num):
+            h = binascii.hexlify(self.f.read(1))
+            temp+=h.decode("utf8")
+        return temp
 
-def distance(p1,p2):
-    return ((p1.x-p2.x)**2+(p1.y-p2.y)**2)**.5
+    def readHeader(self):
+        fileCode = self.readByte(4)
+        if(fileCode!="0000270a"):
+            raise ValueError("Not reading an SHP file")
+        self.readByte(20)
 
-b = turtle.Turtle()
+        self.length = int(self.readByte(4),16)
+        self.version = int(toLittle(self.readByte(4)),16)
 
-def readByte(num):
-    temp = ""
-    for i in range(num):
-        h = binascii.hexlify(f.read(1))
-        temp+=h.decode("utf8")
-    return temp
+        self.shapeType = int(toLittle(self.readByte(4)),16)
 
-def toLittle(b):
-    """B is a string of hex values"""
-    ret = ""
-    for i in range(len(b)-1,-1,-2):
-        ret+=b[i-1:i+1]
+        #Bounding Rectangle
+        mbr = toLittle(self.readByte(32))
+        self.maxY = struct.unpack('d',bytes.fromhex(toLittle(mbr[0:16])))[0]
+        self.maxX = struct.unpack('d',bytes.fromhex(toLittle(mbr[16:32])))[0]
+        self.minY = struct.unpack('d',bytes.fromhex(toLittle(mbr[32:48])))[0]
+        self.minX = struct.unpack('d',bytes.fromhex(toLittle(mbr[48:64])))[0]
 
-    return ret
+        rangeZ = toLittle(self.readByte(16))
+        self.maxZ = struct.unpack('d',bytes.fromhex(toLittle(rangeZ[0:16])))[0]
+        self.minZ = struct.unpack('d',bytes.fromhex(toLittle(rangeZ[16:32])))[0]
 
-def drawPoints(p,minX,minY,maxX,maxY):
+        rangeM = toLittle(self.readByte(16))
+        self.maxM = struct.unpack('d',bytes.fromhex(toLittle(rangeM[0:16])))[0]
+        self.minM = struct.unpack('d',bytes.fromhex(toLittle(rangeM[16:32])))[0]
 
-    averageX = (minX+maxX)/2
-    averageY = (minY+maxY)/2
+    def readBody(self):
+        recordNumber = 1
+        while(recordNumber<=self.maxNum):
+            p = Polygon()
+            try:
+                recordNumber = int(self.readByte(4),16)
+            except:
+                break
+            
+            recordLength = int(self.readByte(4),16)
+            shapeType = int(toLittle(self.readByte(4)),16)
 
-    divide = max(maxX-minX,maxY-minY)
-    minus = max(averageX,averageY)
+            mbr = toLittle(self.readByte(32))
+            p.maxY = struct.unpack('d',bytes.fromhex(toLittle(mbr[0:16])))[0]
+            p.maxX = struct.unpack('d',bytes.fromhex(toLittle(mbr[16:32])))[0]
+            p.minY = struct.unpack('d',bytes.fromhex(toLittle(mbr[32:48])))[0]
+            p.minX = struct.unpack('d',bytes.fromhex(toLittle(mbr[48:64])))[0]
 
-    print(p[:10])
-    
-    scale = 2000
-    k = copy.copy(p)
-    k.append(Point(p[0].x,p[0].y,1))
-    k = list(map(lambda x: Point((x.x-averageX)/divide,(x.y-averageY)/divide,x.num),k))
+            numberParts = int(toLittle(self.readByte(4)),16)
+            numberPoints = int(toLittle(self.readByte(4)),16)
 
-    b.penup()
-    b.setpos((k[0].x*scale,k[0].y*scale))
-    b.pendown()
+            p.parts = []
+            for i in range(numberParts):
+                p.parts.append(int(toLittle(self.readByte(4)),16))
 
-    currentAngle = 0
-    for i in range(1,len(k)):
-        angle = math.degrees(math.atan2(k[i].y-k[i-1].y,k[i].x-k[i-1].x))%360
-        b.left(angle-currentAngle)
-        currentAngle = angle
-        dist = distance(k[i],k[i-1])* scale
-        b.forward(dist)
+            for i in range(0,numberPoints):
+                xy = toLittle(self.readByte(16))
+                y = round(struct.unpack('d',bytes.fromhex(toLittle(xy[0:16])))[0],3)
+                x = round(struct.unpack('d',bytes.fromhex(toLittle(xy[16:32])))[0],3)
+                p.points.append(Point(x,y,i+1))
 
-    b.left(360-currentAngle)
+            p.calcDists()
 
-
-fileName = "data/maryland/county/Maryland_Physical_Boundaries__County_Boundaries_Generalized.shp"
-f = open(fileName,'rb')
-
-fileCode = readByte(4)
-if(fileCode!="0000270a"):
-    raise ValueError("Not reading an SHP file")
-
-readByte(20)
-
-length = readByte(4)
-length = int(length,16)
-print("Length is "+str(length))
-
-version = int(toLittle(readByte(4)),16)
-print("Version is",version)
+            self.shape.polyList.append(p)
 
 
-shapeType = int(toLittle(readByte(4)),16)
-print(shapeType)
-
-mbr = toLittle(readByte(32))
-maxY = struct.unpack('d',bytes.fromhex(toLittle(mbr[0:16])))[0]
-maxX = struct.unpack('d',bytes.fromhex(toLittle(mbr[16:32])))[0]
-minY = struct.unpack('d',bytes.fromhex(toLittle(mbr[32:48])))[0]
-minX = struct.unpack('d',bytes.fromhex(toLittle(mbr[48:64])))[0]
-
-print([minX,minY],[maxX,maxY])
-
-rangeZ = toLittle(readByte(16))
-maxZ = struct.unpack('d',bytes.fromhex(toLittle(rangeZ[0:16])))[0]
-minZ = struct.unpack('d',bytes.fromhex(toLittle(rangeZ[16:32])))[0]
-
-rangeM = toLittle(readByte(16))
-maxM = struct.unpack('d',bytes.fromhex(toLittle(rangeM[0:16])))[0]
-minM = struct.unpack('d',bytes.fromhex(toLittle(rangeM[16:32])))[0]
-
-bottomLeft = (10000,100000)
-topRight = (-10000,-10000)
-points = []
-allPoints = []
 
 counties = ['Allegany County', 'Anne Arundel County', 'Baltimore County', 'Baltimore City', 'Calvert County', 'Caroline County', 'Carroll County', 'Cecil County', 'Charles County',
             'Dorchester County', 'Frederick County', 'Garrett County', 'Harford County', 'Howard County', 'Kent County', 'Montgomery County', "Prince George's County",
             "Queen Anne's County", "Saint Mary's County", 'Somerset County', 'Talbot County', 'Washington County', 'Wicomico County', 'Worcester County']
-while(True):
-    try:
-        recordNumber = int(readByte(4),16)
-    except:
-        break
-    recordLength = int(readByte(4),16)
-    shapeType = int(toLittle(readByte(4)),16)
-    #print("Record: "+str(recordNumber)+ " "+str(recordLength) + " "+str(shapeType))
-    print("County Name: "+counties[recordNumber-1])
 
-    mbr = toLittle(readByte(32))
-    maxY = struct.unpack('d',bytes.fromhex(toLittle(mbr[0:16])))[0]
-    maxX = struct.unpack('d',bytes.fromhex(toLittle(mbr[16:32])))[0]
-    minY = struct.unpack('d',bytes.fromhex(toLittle(mbr[32:48])))[0]
-    minX = struct.unpack('d',bytes.fromhex(toLittle(mbr[48:64])))[0]
-
-    numberParts = int(toLittle(readByte(4)),16)
-    #print("Number of parts is "+str(numberParts))
-
-    numberPoints = int(toLittle(readByte(4)),16)
-    #print("Number of points is "+str(numberPoints))
-
-    partIndexes = []
-    for i in range(numberParts):
-        partIndexes.append(int(toLittle(readByte(4)),16))
-
-    tempPoints = []
-    points.append([])
-    for i in range(0,numberPoints):
-        xy = toLittle(readByte(16))
-        y = round(struct.unpack('d',bytes.fromhex(toLittle(xy[0:16])))[0],3)
-        x = round(struct.unpack('d',bytes.fromhex(toLittle(xy[16:32])))[0],3)
-        points[-1].append(Point(x,y,i+1))
-        allPoints.append(Point(x,y,i+1))
-
+"""
     for i in range(0,numberPoints):
         points[-1][i].dist = distance(points[-1][(i-1)%numberPoints],points[-1][(i)
                             %numberPoints])+distance(points[-1][(i)%numberPoints],points[-1][(i+1)
@@ -180,7 +123,6 @@ while(True):
     print("Diamond percentage "+str(round(realArea/boundingArea,2)))
     
 
-    """
     if(recordNumber==16):
 
         nums = points[recordNumber-1]
