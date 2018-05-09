@@ -1,3 +1,6 @@
+import math
+import copy
+
 class Point:
     def __init__(self,x,y,n):
         self.coord = (x,y)
@@ -42,6 +45,52 @@ class Polygon:
             around-=p[(i-1)%len(p)].dist(p[(i+1)%len(p)])
             self.dists.append(around)
 
+    def calcArea(self):
+        area = 0
+        for i in range(len(self.points)):
+            area+=self.points[i].x * self.points[(i+1)%len(self.points)].y
+            area-=self.points[i].y * self.points[(i+1)%len(self.points)].x
+        area = 1/2 * abs(area)
+        area*=111.111**2 * math.cos(math.pi/180*self.points[0].y)
+        return area
+
+    def calcDiamond(self):
+        angle = 45 * math.pi/180
+        tempPoints = copy.deepcopy(self.points)
+        total = Point(0,0,1)
+        for i in range(len(tempPoints)):
+            total.x+=tempPoints[i].x
+            total.y+=tempPoints[i].y
+            
+        total.x/=len(tempPoints)
+        total.y/=len(tempPoints)
+
+        for i in range(len(tempPoints)):
+            s,c = math.sin(angle), math.cos(angle)
+
+            tempPoints[i].x-=total.x
+            tempPoints[i].y-=total.y
+
+            tempPoints[i].x=total.x + (tempPoints[i].x*c - tempPoints[i].y*s)
+            tempPoints[i].y=total.y + (tempPoints[i].x*s + tempPoints[i].y*c)   
+
+        minX = 1000000
+        maxX = -100000
+        minY = 1000000
+        maxY = -1000000
+
+        for i in range(len(tempPoints)):
+            minX = min(minX,tempPoints[i].x)
+            maxX = max(maxX,tempPoints[i].x)
+            minY = min(minY,tempPoints[i].y)
+            maxY = max(maxY,tempPoints[i].y)
+
+        
+        area = max(maxX-minX)*(maxY-minY)
+        area*=111.111**2 * math.cos(math.pi/180 * self.points[0].y)
+
+        return area
+        
 class Shape:
     def __init__(self):
         self.polyList = []

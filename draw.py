@@ -3,9 +3,10 @@ import math
 import copy
 from geometry import *
 
-b = turtle.Turtle()
 
 def drawPoints(p,minX,minY,maxX,maxY):
+    b = turtle.Turtle()
+
     averageX = (minX+maxX)/2
     averageY = (minY+maxY)/2
 
