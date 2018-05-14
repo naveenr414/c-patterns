@@ -77,8 +77,8 @@ class ShapeFile:
 
             for i in range(0,numberPoints):
                 xy = toLittle(self.readByte(16))
-                y = round(struct.unpack('d',bytes.fromhex(toLittle(xy[0:16])))[0],3)
-                x = round(struct.unpack('d',bytes.fromhex(toLittle(xy[16:32])))[0],3)
+                y = round(struct.unpack('d',bytes.fromhex(toLittle(xy[0:16])))[0],4)
+                x = round(struct.unpack('d',bytes.fromhex(toLittle(xy[16:32])))[0],4)
                 p.points.append(Point(x,y,i+1))
 
             p.calcDists()
