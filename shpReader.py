@@ -8,6 +8,8 @@ import time
 from util import toLittle
 from geometry import *
 
+PRECISION = 2
+
 class ShapeFile:
     def __init__(self,fileName,maxNum = 1000000):
         self.fileName = fileName
@@ -77,8 +79,8 @@ class ShapeFile:
 
             for i in range(0,numberPoints):
                 xy = toLittle(self.readByte(16))
-                y = round(struct.unpack('d',bytes.fromhex(toLittle(xy[0:16])))[0],4)
-                x = round(struct.unpack('d',bytes.fromhex(toLittle(xy[16:32])))[0],4)
+                y = round(struct.unpack('d',bytes.fromhex(toLittle(xy[0:16])))[0],PRECISION)
+                x = round(struct.unpack('d',bytes.fromhex(toLittle(xy[16:32])))[0],PRECISION)
                 p.points.append(Point(x,y,i+1))
 
             p.calcDists()

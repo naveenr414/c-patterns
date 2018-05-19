@@ -4,6 +4,7 @@ import gazetteer
 import util
 from geometry import *
 from shpReader import ShapeFile
+import draw
 
 c = Census("a5c835dd17c5d3d22fe83e5a62d6f8fac6b3344f")
 
@@ -29,6 +30,8 @@ counties = ['Allegany County', 'Anne Arundel County', 'Baltimore County', 'Balti
             "Queen Anne's County", "Saint Mary's County", 'Somerset County', 'Talbot County', 'Washington County', 'Wicomico County', 'Worcester County']
 num = counties.index("Montgomery County")
 s = ShapeFile(fileName,num+1).shape.polyList[num]
+
+draw.drawShape(s)
 
 l1 = Line(Point(-10000,latitude,1),Point(1000,latitude,2))
 intersectPoints = []
