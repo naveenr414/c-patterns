@@ -8,7 +8,7 @@ import time
 from util import toLittle
 from geometry import *
 
-PRECISION = 2
+PRECISION = 4
 
 class ShapeFile:
     def __init__(self,fileName,maxNum = 1000000):

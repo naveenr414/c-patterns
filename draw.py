@@ -4,33 +4,61 @@ import copy
 import pygame, sys
 from pygame.locals import *
 from geometry import *
+import color
 
-pygame.init()
+window = 0
+b = 0
 
-window = pygame.display.set_mode((500,400),0,32)
+def initPygame():
+    global window
+    
+    pygame.init()
+    window = pygame.display.set_mode((500,400),0,32)
+    window.fill(color.WHITE)
 
-def drawPoints(p,minX,minY,maxX,maxY):
+def initTurtle():
+    global b
+    b = turtle.Turtle()
+
+def drawPointsPygame(p,minX,minY,maxX,maxY,fill=color.BLUE):
+    global window
+
     averageX = (minX+maxX)/2
     averageY = (minY+maxY)/2
-
+    
     divide = max(maxX-minX,maxY-minY)
     minus = max(averageX,averageY)
     
     scale = 200
     k = copy.copy(p)
     k.append(Point(p[0].x,p[0].y,1))
-    k = list(map(lambda x: Point((x.x-minX)/divide * scale,(x.y-minY)/divide*scale,x.num),k))
+    
+    k = list(map(lambda x: Point((x.x-minX)/(maxX-minX) * scale,(x.y-minY)/(maxY-minY)*scale,x.num),k))
+
 
     pointList = []
+    biggestY = scale*2
+    
     for i in k:
-        pointList.append([i.x,i.y])
+        pointList.append([i.x+20,biggestY-i.y+20])
 
-    BLUE = (0, 0, 255)
-    pygame.draw.polygon(window, BLUE, pointList,2)
-    pygame.display.update()
+    pygame.draw.polygon(window, fill, pointList,0)
+    pygame.display.update() 
 
+def drawPointsTurtle(p,minX,minY,maxX,maxY):
+    global b
 
-    """
+    averageX = (minX+maxX)/2
+    averageY = (minY+maxY)/2
+
+    divide = max(maxX-minX,maxY-minY)
+    minus = max(averageX,averageY)
+    
+    scale = 300
+    k = copy.copy(p)
+    k.append(Point(p[0].x,p[0].y,1))
+    k = list(map(lambda x: Point((x.x-averageX)/divide,(x.y-averageY)/divide,x.num),k))
+
     b.penup()
     b.setpos((k[0].x*scale,k[0].y*scale))
     b.pendown()
@@ -44,8 +72,10 @@ def drawPoints(p,minX,minY,maxX,maxY):
         b.forward(dist)
 
     b.left(360-currentAngle)
-    """
 
-def drawShape(s):
-    drawPoints(s.points,s.minX,s.minY,s.maxX,s.maxY)
+def drawShapePygame(s):
+    drawPointsPygame(s.points,s.minX,s.minY,s.maxX,s.maxY)
+
+def drawShapeTurtle(s):
+    drawPointsTurtle(s.points,s.minX,s.minY,s.maxX,s.maxY)
 
