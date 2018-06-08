@@ -15,15 +15,14 @@ maxX = s.polyList[0].maxX
 maxY = s.polyList[0].maxY
 
 for i in range(len(s.polyList)):
-    minX = min(minX,s.polyList[i].minX)
-    minY = min(minY,s.polyList[i].minY)
-    maxX = max(maxX,s.polyList[i].maxX)
-    maxY = max(maxY,s.polyList[i].maxY)
-    print("Max Y",maxY)
+    minX = min(minX,min(s.polyList[i].points,key=lambda x: x.x).x)
+    minY = min(minY,min(s.polyList[i].points,key=lambda x: x.y).y)
+    maxX = max(maxX,max(s.polyList[i].points,key=lambda x: x.x).x)
+    maxY = max(maxY,max(s.polyList[i].points,key=lambda x: x.y).y)
 
 draw.initPygame()
 
 for i in range(len(s.polyList)):
     draw.drawPointsPygame(s.polyList[i].points,minX,minY,(maxX-minX)/2+minX,(minY+maxY)/2,fill=colors[i%len(colors)])
-
+    
 

@@ -21,26 +21,23 @@ def initTurtle():
     b = turtle.Turtle()
 
 def drawPointsPygame(p,minX,minY,maxX,maxY,fill=color.BLUE):
-    global window
-
-    averageX = (minX+maxX)/2
-    averageY = (minY+maxY)/2
+    global window    
     
-    divide = max(maxX-minX,maxY-minY)
-    minus = max(averageX,averageY)
-    
-    scale = 200
     k = copy.copy(p)
-    k.append(Point(p[0].x,p[0].y,1))
+    w, h = pygame.display.get_surface().get_size()
+
+    divide = max((maxX-minX)/w, 1.14*(maxY-minY)/h)*2
     
-    k = list(map(lambda x: Point((x.x-minX)/(maxX-minX) * scale,(x.y-minY)/(maxY-minY)*scale,x.num),k))
+    k.append(Point(p[0].x,p[0].y,1))
+    k = list(map(lambda x: Point(x.x-minX,x.y-minY,x.num),k))
+    k = list(map(lambda x: Point(x.x/divide,x.y/divide,x.num),k))
+    k = list(map(lambda x: Point(x.x,h-1.14*x.y,x.num),k))
 
 
     pointList = []
-    biggestY = scale*2
     
     for i in k:
-        pointList.append([i.x+20,biggestY-i.y+20])
+        pointList.append([i.x,i.y])
 
     pygame.draw.polygon(window, fill, pointList,0)
     pygame.display.update() 
