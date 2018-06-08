@@ -1,3 +1,5 @@
+import math
+
 def toLittle(b):
     """B is a string of hex values"""
     ret = ""
@@ -16,4 +18,28 @@ def toCsv(points):
         j+="\n"
 
     return j
+
+def distLong(long1,long2,lat):
+    math.cos(math.pi*lat/180)*(long2-long1) * 69.172
+
+def distLat(lat1,lat2):
+    68*(lat2-lat1)
+
+def ratio(lat):
+    #Ratio between latitude and longitude lengths
+    return math.cos(math.pi*lat/180)
+
+def calcExtrema(polyList):
+    minX = polyList[0].minX
+    minY = polyList[0].minY
+    maxX = polyList[0].maxX
+    maxY = polyList[0].maxY
+    
+    for i in range(len(polyList)):
+        minX = min(minX,min(polyList[i].points,key=lambda x: x.x).x)
+        minY = min(minY,min(polyList[i].points,key=lambda x: x.y).y)
+        maxX = max(maxX,max(polyList[i].points,key=lambda x: x.x).x)
+        maxY = max(maxY,max(polyList[i].points,key=lambda x: x.y).y)
+
+    return (minX, minY, maxX, maxY)
 
