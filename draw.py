@@ -22,7 +22,7 @@ def initTurtle():
     global b
     b = turtle.Turtle()
 
-def drawPointsPygame(p,minX,minY,maxX,maxY,fill=color.BLUE):
+def drawPointsPygame(p,minX,minY,maxX,maxY,fill=color.BLUE,outline=True):
     global window    
     
     k = copy.copy(p)
@@ -41,6 +41,8 @@ def drawPointsPygame(p,minX,minY,maxX,maxY,fill=color.BLUE):
         pointList.append([i.x,i.y])
 
     pygame.draw.polygon(window, fill, pointList,0)
+    if(outline):
+        pygame.draw.polygon(window, color.BLACK, pointList,1)
     pygame.display.update() 
 
 def drawPointsTurtle(p,minX,minY,maxX,maxY):

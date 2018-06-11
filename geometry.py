@@ -1,5 +1,7 @@
 import math
 import copy
+import numpy as np
+from util import *
 
 class Point:
     def __init__(self,x,y,n):
@@ -53,6 +55,20 @@ class Line:
             return Point(xi,yi,1)
         else:
             return False
+
+    def dist(self,p3):
+        A = np.array((distLong(0,self.p1.x,self.p1.y),distLat(0,self.p1.y)))
+        B = np.array((distLong(0,self.p2.x,self.p2.y),distLat(0,self.p2.y)))
+        P = np.array((distLong(0,p3.x,p3.y),distLat(0,p3.y)))
+
+
+        if all(A == P) or all(B == P):
+            return 0
+        if np.arccos(np.dot((P - A) / np.linalg.norm(P - A), (B - A) / np.linalg.norm(B - A))) > np.pi / 2:
+            return np.linalg.norm(P - A)
+        if np.arccos(np.dot((P - B) / np.linalg.norm(P - B), (A - B) / np.linalg.norm(A - B))) > np.pi / 2:
+            return np.linalg.norm(P - B)
+        return np.linalg.norm(np.cross(A-B,A-P))/np.linalg.norm(B-A)
 
 class Polygon:
     def __init__(self):

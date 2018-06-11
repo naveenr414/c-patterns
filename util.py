@@ -20,10 +20,10 @@ def toCsv(points):
     return j
 
 def distLong(long1,long2,lat):
-    math.cos(math.pi*lat/180)*(long2-long1) * 69.172
+    return math.cos(math.pi*lat/180)*(long2-long1) * 69.172
 
 def distLat(lat1,lat2):
-    68*(lat2-lat1)
+    return 68*(lat2-lat1)
 
 def ratio(lat):
     #Ratio between latitude and longitude lengths
