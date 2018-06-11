@@ -35,7 +35,8 @@ for i in range(len(s.polyList)):
                          1/len(s.polyList[i].points)*reduce(lambda x, y: x+y.y, (y for y in s.polyList[i].points),0),1)
     dist = min(l1.dist(p),l2.dist(p))
 
-    col = (min(1,dist/16)*255,255-min(1,dist/16)*255,0)    
+    cutoff = 16
+    col = (min(1,dist/cutoff)*255,0,255-min(1,dist/cutoff)*255)    
 
     if(s.polyList[i].points[0].y<38.9):
         print(dist)
