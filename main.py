@@ -17,6 +17,19 @@ fileName = "data/Moco/tl_2014_24031_faces.shp"
 s = ShapeFile(fileName).shape
 
 minX, minY, maxX, maxY = util.calcExtrema(s.polyList)
+minX = maxX-(maxX-minX)/4
+minY = 10000
+maxY = 0
+
+for i in range(len(s.polyList)):
+    tempMinX = min(s.polyList[i].points,key=lambda x: x.x).x
+    tempMinY = min(s.polyList[i].points,key=lambda x: x.y).y
+    tempMaxY = max(s.polyList[i].points,key=lambda x: x.y).y
+    if(tempMinX>minX):
+        minY = min(minY,tempMinY)
+        maxY = max(maxY,tempMaxY)
+    
+#maxY = (minY+maxY)/4
 
 draw.initPygame()
 
@@ -35,11 +48,9 @@ for i in range(len(s.polyList)):
                          1/len(s.polyList[i].points)*reduce(lambda x, y: x+y.y, (y for y in s.polyList[i].points),0),1)
     dist = min(l1.dist(p),l2.dist(p))
 
-    cutoff = 16
-    col = (min(1,dist/cutoff)*255,0,255-min(1,dist/cutoff)*255)    
-
-    if(s.polyList[i].points[0].y<38.9):
-        print(dist)
+    cutoff = 4
+    value = min(1,dist/cutoff)
+    col = color.gradient(color.hexToRGB("#3A1C71"),color.hexToRGB("#FFAF7B"),value)  
 
     draw.drawPointsPygame(s.polyList[i].points,minX,minY,maxX,maxY,fill=col,outline=False)
 

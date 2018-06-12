@@ -28,21 +28,31 @@ def drawPointsPygame(p,minX,minY,maxX,maxY,fill=color.BLUE,outline=True):
     k = copy.copy(p)
     w, h = pygame.display.get_surface().get_size()
 
+    divideX = ((maxX-minX)/w)
+    divideY = 1/util.ratio((minY+maxY)/2)*(maxY-minY)/h
+
     divide = max((maxX-minX)/w, 1/util.ratio((minY+maxY)/2)*(maxY-minY)/h)
     
     k.append(Point(p[0].x,p[0].y,1))
-    k = list(map(lambda x: Point(x.x-minX,x.y-minY,x.num),k))
-    k = list(map(lambda x: Point(x.x/divide,x.y/divide,x.num),k))
-    k = list(map(lambda x: Point(x.x,h-1/util.ratio((minY+maxY)/2)*x.y,x.num),k))
 
     pointList = []
-    
-    for i in k:
-        pointList.append([i.x,i.y])
 
-    pygame.draw.polygon(window, fill, pointList,0)
-    if(outline):
-        pygame.draw.polygon(window, color.BLACK, pointList,1)
+
+    for i in range(len(k)):
+        p = k[i]
+        if(minX<=p.x<=maxX and minY<=p.y<=maxY):
+            p.x = p.x-minX
+            p.y = p.y-minY
+            p.x = p.x/divide
+            p.y = p.y/divide
+            p.y = h-1/util.ratio((minY+maxY)/2)*p.y
+
+            pointList.append([p.x,p.y])
+
+    if(len(pointList)>2):
+        pygame.draw.polygon(window, fill, pointList,0)
+        if(outline):
+            pygame.draw.polygon(window, color.BLACK, pointList,1)
     pygame.display.update() 
 
 def drawPointsTurtle(p,minX,minY,maxX,maxY):

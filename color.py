@@ -51,6 +51,13 @@ def toRGB(c):
     color = [(i+m)*255 for i in color]
     return color
 
+def hexToRGB(h):
+    c = []
+    h = h.replace("#","")
+    for i in range(0,len(h),2):
+        c.append(int(h[i:i+2],16))
+    return c
+
 def gradient(start,end,value):
     start = toHSV(start)
     end = toHSV(end)
