@@ -35,5 +35,5 @@ while running:
 
 ```
 
-![Alt][Image/bluemoco.png "Picture of output"]
+![alt text](Images/bluemoco.png "Logo Title Text 1")
 
